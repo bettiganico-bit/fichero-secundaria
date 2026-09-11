@@ -329,6 +329,25 @@
             letter-spacing: 0.5px;
         }
 
+        .pending-btn-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background-color: var(--echeverria-teal-dark);
+            color: white;
+            padding: 0.5rem 0.8rem;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-top: 0.4rem;
+            transition: background 0.2s;
+        }
+
+        .pending-btn-link:hover {
+            background-color: var(--echeverria-dark);
+        }
+
         .timeline {
             display: flex;
             flex-direction: column;
@@ -536,6 +555,12 @@
             return row;
         }
 
+        // URL EXTRACTION HELPER
+        function extractUrl(text) {
+            const match = text.match(/https?:\/\/[^\s"\')]+/);
+            return match ? match[0] : null;
+        }
+
         // LOAD SHEET DATA
         async function loadSheetData() {
             try {
@@ -634,9 +659,17 @@
                 <p style="font-size: 0.88rem;"><strong>Acompañamiento:</strong> ${student.acompDetail}</p>
             `;
 
+            // RENDERIZADO MEJORADO DE PENDIENTES CON SOPORTE PARA LINKS
             if (student.pending.length > 0 && student.pending[0] !== 'Sin materias pendientes') {
                 let pendingHtml = '<ul style="padding-left: 1.2rem; font-size: 0.88rem;">';
-                student.pending.forEach(p => { pendingHtml += `<li>${p}</li>`; });
+                student.pending.forEach(p => { 
+                    const url = extractUrl(p);
+                    if (url) {
+                        pendingHtml += `<li style="margin-bottom: 0.4rem;"><a href="${url}" target="_blank" class="pending-btn-link"><i class="fa-solid fa-arrow-up-right-from-square"></i> Abrir Hoja de Pendientes</a></li>`;
+                    } else {
+                        pendingHtml += `<li>${p}</li>`; 
+                    }
+                });
                 pendingHtml += '</ul>';
                 document.getElementById('pendingDetails').innerHTML = pendingHtml;
             } else {
