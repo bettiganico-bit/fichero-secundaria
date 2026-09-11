@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fichero Digital de Trayectorias | Colegio Esteban Echeverría</title>
+    <!-- FontAwesome para Iconos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --echeverria-red: #8B1E2B;
+            --echeverria-dark: #1A2530;
+            --echeverria-blue: #0A192F;
+            --bg-light: #F4F6F9;
+            --card-bg: #FFFFFF;
+            --border-color: #E2E8F0;
+            --text-main: #2D3748;
+            --text-muted: #718096;
+            --ppi-color: #DD6B20;
+            --acomp-color: #3182CE;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-light);
+            color: var(--text-main);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* HEADER INSTITUCIONAL */
+        header {
+            background-color: var(--echeverria-red);
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .header-title {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .header-title h1 {
+            font-size: 1.4rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        .header-title p {
+            font-size: 0.85rem;
+            opacity: 0.9;
+        }
+
+        .header-nav {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .btn-link {
+            background-color: rgba(255, 255, 255, 0.15);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-link:hover {
+            background-color: rgba(255, 255, 255, 0.3);
+        }
+
+        /* LAYOUT PRINCIPAL */
+        .container {
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            gap: 1.5rem;
+            padding: 1.5rem 2rem;
+            flex-grow: 1;
+        }
+
+        /* SIDEBAR / LISTADO DE ALUMNOS */
+        .sidebar {
+            background: var(--card-bg);
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            height: calc(100vh - 120px);
+        }
+
+        .search-box {
+            position: relative;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 0.6rem 0.6rem 0.6rem 2.2rem;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 0.9rem;
+            outline: none;
+        }
+
+        .search-box i {
+            position: absolute;
+            left: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+        }
+
+        .student-list {
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .student-item {
+            padding: 0.8rem;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .student-item:hover, .student-item.active {
+            border-color: var(--echeverria-red);
+            background-color: #FFF5F5;
+        }
+
+        .student-info h4 {
+            font-size: 0.95rem;
+            color: var(--echeverria-dark);
+        }
+
+        .student-info p {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .badges {
+            display: flex;
+            gap: 0.3rem;
+        }
+
+        .badge {
+            font-size: 0.65rem;
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-weight: 700;
+            color: white;
+        }
+
+        .badge-ppi { background-color: var(--ppi-color); }
+        .badge-acomp { background-color: var(--acomp-color); }
+
+        /* CONTENIDO PRINCIPAL / FICHA DEL ALUMNO */
+        .main-content {
+            background: var(--card-bg);
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            padding: 1.5rem;
+            overflow-y: auto;
+            height: calc(100vh - 120px);
+        }
+
+        .student-header {
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 1rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .student-title h2 {
+            font-size: 1.5rem;
+            color: var(--echeverria-dark);
+        }
+
+        .student-title p {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .card-section {
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 1rem;
+            background-color: #FAFAFA;
+        }
+
+        .card-section h3 {
+            font-size: 1rem;
+            color: var(--echeverria-red);
+            margin-bottom: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* HISTORIAL / BITÁCORA */
+        .timeline {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .timeline-entry {
+            background: white;
+            border-left: 4px solid var(--echeverria-red);
+            padding: 0.8rem 1rem;
+            border-radius: 0 6px 6px 0;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .timeline-date {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            margin-bottom: 0.3rem;
+        }
+
+        .timeline-text {
+            font-size: 0.88rem;
+            line-height: 1.4;
+        }
+
+        /* FORMULARIO BITACORA */
+        .add-entry-form {
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+            margin-top: 1rem;
+        }
+
+        textarea {
+            width: 100%;
+            padding: 0.6rem;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            resize: vertical;
+            min-height: 70px;
+            font-size: 0.88rem;
+        }
+
+        .btn-submit {
+            align-self: flex-end;
+            background-color: var(--echeverria-red);
+            color: white;
+            border: none;
+            padding: 0.5rem 1.2rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+
+        .btn-submit:hover {
+            opacity: 0.9;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="header-title">
+            <i class="fa-solid fa-folder-open fa-2x"></i>
+            <div>
+                <h1>Colegio Esteban Echeverría</h1>
+                <p>Fichero de Trayectorias Educativas — Dirección Secundaria</p>
+            </div>
+        </div>
+        <div class="header-nav">
+            <a href="https://bettiganico-bit.github.io/Planillon-Pendientes/" target="_blank" class="btn-link">
+                <i class="fa-solid fa-table"></i> Planillón Pendientes
+            </a>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- BARRA LATERAL: BUSCADOR Y LISTA -->
+        <aside class="sidebar">
+            <div class="search-box">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" id="searchInput" placeholder="Buscar por alumno o código..." onkeyup="filterStudents()">
+            </div>
+            <div class="student-list" id="studentList">
+                <!-- Se cargan dinámicamente -->
+            </div>
+        </aside>
+
+        <!-- CONTENIDO PRINCIPAL: FICHA DEL ALUMNO -->
+        <main class="main-content" id="mainContent">
+            <div class="student-header">
+                <div class="student-title">
+                    <h2 id="studentName">Seleccioná un alumno</h2>
+                    <p id="studentMeta">Código: - | Curso: -</p>
+                </div>
+                <div class="badges" id="studentBadges"></div>
+            </div>
+
+            <div class="grid-2">
+                <!-- SECCIÓN PPI Y ACOMPAÑAMIENTOS -->
+                <div class="card-section">
+                    <h3><i class="fa-solid fa-user-check"></i> Dispositivos y Acompañamientos</h3>
+                    <div id="ppiDetails">
+                        <p style="font-size: 0.85rem; color: var(--text-muted);">Seleccioná un estudiante para ver sus configuraciones de apoyo o PPI.</p>
+                    </div>
+                </div>
+
+                <!-- SECCIÓN PENDIENTES / TRAYECTORIAS -->
+                <div class="card-section">
+                    <h3><i class="fa-solid fa-book-bookmark"></i> Materias Pendientes (Articulación)</h3>
+                    <div id="pendingDetails">
+                        <p style="font-size: 0.85rem; color: var(--text-muted);">Sin información de pendientes cargada.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- BITÁCORA / SEGUIMIENTO HISTÓRICO -->
+            <div class="card-section">
+                <h3><i class="fa-solid fa-clock-rotate-left"></i> Historial y Recorrido Institucional</h3>
+                
+                <div class="add-entry-form">
+                    <textarea id="newEntryText" placeholder="Registrar nueva intervención, acuerdo pedagógico, reunión con familias o informe de EOE..."></textarea>
+                    <button class="btn-submit" onclick="addTimelineEntry()"><i class="fa-solid fa-plus"></i> Registrar Intervención</button>
+                </div>
+
+                <div class="timeline" id="timelineList">
+                    <!-- Registros dinámicos -->
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // DATOS DE PRUEBA (Estructura inicial)
+        const studentsData = [
+            {
+                id: "ALU-101",
+                name: "García, Lucas",
+                course: "3° Año A",
+                ppi: true,
+                ppiDetail: "PPI activo con adecuación metodológica y evaluativa. APND en aula (Martes y Jueves).",
+                acomp: true,
+                acompDetail: "Seguimiento periódico por Equipo de Orientación Escolar (EOE).",
+                pending: ["Matemática (2° Año) - Pendiente", "Geografía (2° Año) - En Proceso"],
+                timeline: [
+                    { date: "15/03/2026", text: "Reunión con la familia e integradora APND para acordar pautas de evaluación del primer cuatrimestre." },
+                    { date: "02/03/2026", text: "Inicio de ciclo lectivo con presentación del informe pedagógico 2025." }
+                ]
+            },
+            {
+                id: "ALU-102",
+                name: "Martínez, Sofía",
+                course: "5° Año B",
+                ppi: false,
+                ppiDetail: "Sin PPI asignado.",
+                acomp: false,
+                acompDetail: "Sin acompañamientos específicos registrados.",
+                pending: ["Físico-Química (3° Año) - Pendiente"],
+                timeline: [
+                    { date: "10/03/2026", text: "Entrevista individual sobre plan de acreditación de materia pendiente de 3° año." }
+                ]
+            }
+        ];
+
+        let selectedStudentId = null;
+
+        function renderStudentList() {
+            const list = document.getElementById('studentList');
+            list.innerHTML = '';
+            studentsData.forEach(student => {
+                const item = document.createElement('div');
+                item.className = `student-item ${selectedStudentId === student.id ? 'active' : ''}`;
+                item.onclick = () => selectStudent(student.id);
+                
+                let badgesHtml = '';
+                if(student.ppi) badgesHtml += `<span class="badge badge-ppi">PPI</span>`;
+                if(student.acomp) badgesHtml += `<span class="badge badge-acomp">ACOMP</span>`;
+
+                item.innerHTML = `
+                    <div class="student-info">
+                        <h4>${student.name}</h4>
+                        <p>${student.course} | Cód: ${student.id}</p>
+                    </div>
+                    <div class="badges">${badgesHtml}</div>
+                `;
+                list.appendChild(item);
+            });
+        }
+
+        function selectStudent(id) {
+            selectedStudentId = id;
+            renderStudentList();
+            const student = studentsData.find(s => s.id === id);
+            if (!student) return;
+
+            document.getElementById('studentName').innerText = student.name;
+            document.getElementById('studentMeta').innerText = `Código: ${student.id} | Curso: ${student.course}`;
+            
+            // Badges
+            let badgesHtml = '';
+            if(student.ppi) badgesHtml += `<span class="badge badge-ppi">PPI VIGENTE</span>`;
+            if(student.acomp) badgesHtml += `<span class="badge badge-acomp">ACOMPAÑAMIENTO EOE</span>`;
+            document.getElementById('studentBadges').innerHTML = badgesHtml;
+
+            // PPI Details
+            document.getElementById('ppiDetails').innerHTML = `
+                <p style="font-size: 0.88rem; margin-bottom: 0.5rem;"><strong>PPI:</strong> ${student.ppiDetail}</p>
+                <p style="font-size: 0.88rem;"><strong>Acompañamiento:</strong> ${student.acompDetail}</p>
+            `;
+
+            // Pendientes
+            let pendingHtml = '<ul style="padding-left: 1.2rem; font-size: 0.88rem;">';
+            student.pending.forEach(p => {
+                pendingHtml += `<li>${p}</li>`;
+            });
+            pendingHtml += '</ul>';
+            document.getElementById('pendingDetails').innerHTML = pendingHtml;
+
+            // Timeline
+            renderTimeline(student);
+        }
+
+        function renderTimeline(student) {
+            const timelineList = document.getElementById('timelineList');
+            timelineList.innerHTML = '';
+            student.timeline.forEach(entry => {
+                const div = document.createElement('div');
+                div.className = 'timeline-entry';
+                div.innerHTML = `
+                    <div class="timeline-date">${entry.date}</div>
+                    <div class="timeline-text">${entry.text}</div>
+                `;
+                timelineList.appendChild(div);
+            });
+        }
+
+        function addTimelineEntry() {
+            if (!selectedStudentId) {
+                alert("Por favor seleccioná un alumno primero.");
+                return;
+            }
+            const textInput = document.getElementById('newEntryText');
+            if (!textInput.value.trim()) return;
+
+            const student = studentsData.find(s => s.id === selectedStudentId);
+            const today = new Date().toLocaleDateString('es-AR');
+            
+            student.timeline.unshift({
+                date: today,
+                text: textInput.value.trim()
+            });
+
+            textInput.value = '';
+            renderTimeline(student);
+        }
+
+        function filterStudents() {
+            const query = document.getElementById('searchInput').value.toLowerCase();
+            const items = document.querySelectorAll('.student-item');
+            items.forEach(item => {
+                const text = item.innerText.toLowerCase();
+                item.style.display = text.includes(query) ? 'flex' : 'none';
+            });
+        }
+
+        // Inicializar
+        renderStudentList();
+        if(studentsData.length > 0) selectStudent(studentsData[0].id);
+    </script>
+</body>
+</html>
