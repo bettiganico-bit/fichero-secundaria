@@ -329,25 +329,6 @@
             letter-spacing: 0.5px;
         }
 
-        .pending-btn-link {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            background-color: var(--echeverria-teal-dark);
-            color: white;
-            padding: 0.5rem 0.8rem;
-            border-radius: 6px;
-            text-decoration: none;
-            font-size: 0.85rem;
-            font-weight: 600;
-            margin-top: 0.4rem;
-            transition: background 0.2s;
-        }
-
-        .pending-btn-link:hover {
-            background-color: var(--echeverria-dark);
-        }
-
         .timeline {
             display: flex;
             flex-direction: column;
@@ -456,7 +437,7 @@
         <aside class="sidebar">
             <div class="search-box">
                 <i class="fa-solid fa-magnifying-glass"></i>
-                <input type="text" id="searchInput" placeholder="Buscar por alumno o código..." onkeyup="filterStudents()">
+                <input type="text" id="searchInput" placeholder="Buscar por alumno o legajo..." onkeyup="filterStudents()">
             </div>
             <div class="student-list" id="studentList">
                 <p style="text-align: center; font-size: 0.85rem; color: var(--text-muted); padding: 1rem;">Cargando alumnos...</p>
@@ -468,15 +449,15 @@
             <div class="student-header">
                 <div class="student-title">
                     <h2 id="studentName">Seleccioná un alumno</h2>
-                    <p id="studentMeta">Código: - | Curso: - | Orientación: -</p>
+                    <p id="studentMeta">Legajo: - | Curso: - | Citade: -</p>
                 </div>
                 <div class="badges" id="studentBadges"></div>
             </div>
 
             <div class="grid-2">
-                <!-- PPI Y ACOMPAÑAMIENTOS -->
+                <!-- PPI Y ADAPTACIONES -->
                 <div class="card-section">
-                    <h3><i class="fa-solid fa-user-check"></i> Dispositivos y Acompañamientos</h3>
+                    <h3><i class="fa-solid fa-user-check"></i> Dispositivos y Adaptaciones</h3>
                     <div id="ppiDetails">
                         <p style="font-size: 0.85rem; color: var(--text-muted);">Seleccioná un estudiante para ver sus configuraciones de apoyo.</p>
                     </div>
@@ -536,7 +517,7 @@
 
         // CSV PARSER
         function parseCSVLine(text) {
-            let p = '', c = '', inQuotes = false;
+            let p = '', inQuotes = false;
             let row = [];
             for (let i = 0; i < text.length; i++) {
                 let cc = text[i];
@@ -555,13 +536,7 @@
             return row;
         }
 
-        // URL EXTRACTION HELPER
-        function extractUrl(text) {
-            const match = text.match(/https?:\/\/[^\s"\')]+/);
-            return match ? match[0] : null;
-        }
-
-        // LOAD SHEET DATA
+        // LOAD SHEET DATA (CORREGIDO DE ACUERDO A TU ESTRUCTURA REAL)
         async function loadSheetData() {
             try {
                 const response = await fetch(SHEET_CSV_URL);
@@ -574,17 +549,17 @@
                     const row = parseCSVLine(lines[i]);
                     if (row.length < 2) continue;
 
-                    const id = row[0] || `ALU-${i}`;
+                    // A: CITADE | B: NOMBRE Y APELLIDO | C: NIVEL | D: LEGAJO | E: PPI | F: ADAPTACIO | G: PENDIENTES | H: DOE | I: HISTORIAL
+                    const citade = row[0] || '-';
                     const name = row[1] || 'Sin Nombre';
                     const course = row[2] || '-';
-                    const orientation = row[3] || '-';
+                    const legajo = row[3] || `ALU-${i}`;
                     const ppi = (row[4] || '').toUpperCase() === 'SI';
-                    const ppiDetail = row[5] || 'Sin observaciones.';
-                    const acomp = (row[6] || '').toUpperCase() === 'SI';
-                    const acompDetail = row[7] || 'Sin observaciones.';
-                    const pendingRaw = row[8] || '';
+                    const adaptacioDetail = row[5] || 'Sin observaciones.';
+                    const pendingRaw = row[6] || '';
                     const pending = pendingRaw ? pendingRaw.split(';').map(p => p.trim()) : [];
-                    const historyRaw = row[9] || '';
+                    const doeDetail = row[7] || 'Sin observaciones.';
+                    const historyRaw = row[8] || '';
                     
                     let timeline = [];
                     if (historyRaw) {
@@ -603,7 +578,15 @@
                     }
 
                     studentsData.push({
-                        id, name, course, orientation, ppi, ppiDetail, acomp, acompDetail, pending, timeline
+                        id: legajo, 
+                        name, 
+                        course, 
+                        citade, 
+                        ppi, 
+                        adaptacioDetail, 
+                        doeDetail, 
+                        pending, 
+                        timeline
                     });
                 }
 
@@ -627,12 +610,11 @@
                 
                 let badgesHtml = '';
                 if(student.ppi) badgesHtml += `<span class="badge badge-ppi">PPI</span>`;
-                if(student.acomp) badgesHtml += `<span class="badge badge-acomp">ACOMP</span>`;
 
                 item.innerHTML = `
                     <div class="student-info">
                         <h4>${student.name}</h4>
-                        <p>${student.course} | Cód: ${student.id}</p>
+                        <p>${student.course} | Legajo: ${student.id}</p>
                     </div>
                     <div class="badges">${badgesHtml}</div>
                 `;
@@ -647,28 +629,22 @@
             if (!student) return;
 
             document.getElementById('studentName').innerText = student.name;
-            document.getElementById('studentMeta').innerText = `Código: ${student.id} | Curso: ${student.course} | Orientación: ${student.orientation}`;
+            document.getElementById('studentMeta').innerText = `Legajo: ${student.id} | Curso: ${student.course} | CITADE: ${student.citade}`;
             
             let badgesHtml = '';
             if(student.ppi) badgesHtml += `<span class="badge badge-ppi">PPI VIGENTE</span>`;
-            if(student.acomp) badgesHtml += `<span class="badge badge-acomp">ACOMPAÑAMIENTO EOE</span>`;
             document.getElementById('studentBadges').innerHTML = badgesHtml;
 
             document.getElementById('ppiDetails').innerHTML = `
-                <p style="font-size: 0.88rem; margin-bottom: 0.5rem;"><strong>PPI:</strong> ${student.ppiDetail}</p>
-                <p style="font-size: 0.88rem;"><strong>Acompañamiento:</strong> ${student.acompDetail}</p>
+                <p style="font-size: 0.88rem; margin-bottom: 0.5rem;"><strong>Adaptación:</strong> ${student.adaptacioDetail}</p>
+                <p style="font-size: 0.88rem;"><strong>DOE / Acompañamiento:</strong> ${student.doeDetail}</p>
             `;
 
-            // RENDERIZADO MEJORADO DE PENDIENTES CON SOPORTE PARA LINKS
-            if (student.pending.length > 0 && student.pending[0] !== 'Sin materias pendientes') {
-                let pendingHtml = '<ul style="padding-left: 1.2rem; font-size: 0.88rem;">';
+            // MUESTRA LAS MATERIAS PENDIENTES
+            if (student.pending.length > 0 && student.pending[0] !== '') {
+                let pendingHtml = '<ul style="padding-left: 1.2rem; font-size: 0.88rem; font-weight: 600; color: #C53030;">';
                 student.pending.forEach(p => { 
-                    const url = extractUrl(p);
-                    if (url) {
-                        pendingHtml += `<li style="margin-bottom: 0.4rem;"><a href="${url}" target="_blank" class="pending-btn-link"><i class="fa-solid fa-arrow-up-right-from-square"></i> Abrir Hoja de Pendientes</a></li>`;
-                    } else {
-                        pendingHtml += `<li>${p}</li>`; 
-                    }
+                    pendingHtml += `<li style="margin-bottom: 0.3rem;">${p}</li>`; 
                 });
                 pendingHtml += '</ul>';
                 document.getElementById('pendingDetails').innerHTML = pendingHtml;
