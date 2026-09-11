@@ -37,6 +37,88 @@
             min-height: 100vh;
         }
 
+        /* OVERLAY DE SEGURIDAD / LOGIN */
+        #loginOverlay {
+            position: fixed;
+            top: 0; 
+            left: 0; 
+            width: 100vw; 
+            height: 100vh;
+            background-color: var(--echeverria-blue);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+
+        .login-card {
+            background: white;
+            padding: 2.5rem;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+        }
+
+        .login-card i.main-icon {
+            font-size: 3rem; 
+            color: var(--echeverria-red); 
+            margin-bottom: 1rem;
+        }
+
+        .login-card h2 {
+            color: var(--echeverria-dark); 
+            font-size: 1.3rem; 
+            margin-bottom: 0.3rem;
+        }
+
+        .login-card p.sub {
+            color: var(--text-muted); 
+            font-size: 0.85rem; 
+            margin-bottom: 1.5rem;
+        }
+
+        .login-input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 0.95rem;
+            margin-bottom: 1rem;
+            outline: none;
+            text-align: center;
+            transition: border-color 0.2s;
+        }
+
+        .login-input:focus {
+            border-color: var(--echeverria-red);
+        }
+
+        .btn-login {
+            width: 100%;
+            background-color: var(--echeverria-red);
+            color: white;
+            border: none;
+            padding: 0.75rem;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        .btn-login:hover {
+            opacity: 0.9;
+        }
+
+        #errorMsg {
+            color: #E53E3E; 
+            font-size: 0.85rem; 
+            margin-top: 0.8rem; 
+            display: none;
+        }
+
         /* HEADER INSTITUCIONAL */
         header {
             background-color: var(--echeverria-red);
@@ -68,6 +150,7 @@
         .header-nav {
             display: flex;
             gap: 1rem;
+            align-items: center;
         }
 
         .btn-link {
@@ -82,6 +165,8 @@
             display: flex;
             align-items: center;
             gap: 0.5rem;
+            border: none;
+            cursor: pointer;
         }
 
         .btn-link:hover {
@@ -259,7 +344,7 @@
             line-height: 1.4;
         }
 
-        /* FORMULARIO BITACORA */
+        /* FORMULARIO BITÁCORA */
         .add-entry-form {
             display: flex;
             flex-direction: column;
@@ -296,6 +381,22 @@
 </head>
 <body>
 
+    <!-- OVERLAY DE SEGURIDAD / LOGIN -->
+    <div id="loginOverlay">
+        <div class="login-card">
+            <i class="fa-solid fa-shield-halved main-icon"></i>
+            <h2>Fichero de Dirección</h2>
+            <p class="sub">Colegio Esteban Echeverría · Nivel Secundario</p>
+            
+            <form onsubmit="validarAcceso(event)">
+                <input type="password" id="accessPass" class="login-input" placeholder="Ingresá la clave de acceso" required autofocus>
+                <button type="submit" class="btn-login">Ingresar al Fichero</button>
+            </form>
+            <p id="errorMsg">Contraseña incorrecta. Intentalo de nuevo.</p>
+        </div>
+    </div>
+
+    <!-- HEADER INSTITUCIONAL -->
     <header>
         <div class="header-title">
             <i class="fa-solid fa-folder-open fa-2x"></i>
@@ -308,6 +409,9 @@
             <a href="https://bettiganico-bit.github.io/Planillon-Pendientes/" target="_blank" class="btn-link">
                 <i class="fa-solid fa-table"></i> Planillón Pendientes
             </a>
+            <button class="btn-link" onclick="cerrarSesion()">
+                <i class="fa-solid fa-right-from-bracket"></i> Salir
+            </button>
         </div>
     </header>
 
@@ -368,7 +472,40 @@
     </div>
 
     <script>
-        // DATOS DE PRUEBA (Estructura inicial)
+        // CONFIGURACIÓN DE SEGURIDAD Y CLAVE
+        const CLAVE_DIRECCION = "Echeverria2026"; // Clave de acceso configurable
+
+        function validarAcceso(event) {
+            event.preventDefault();
+            const inputPass = document.getElementById('accessPass').value;
+            const errorMsg = document.getElementById('errorMsg');
+
+            if (inputPass === CLAVE_DIRECCION) {
+                document.getElementById('loginOverlay').style.display = 'none';
+                sessionStorage.setItem('acceso_autorizado', 'true');
+            } else {
+                errorMsg.style.display = 'block';
+                document.getElementById('accessPass').value = '';
+            }
+        }
+
+        function cerrarSesion() {
+            sessionStorage.removeItem('acceso_autorizado');
+            document.getElementById('accessPass').value = '';
+            document.getElementById('errorMsg').style.display = 'none';
+            document.getElementById('loginOverlay').style.display = 'flex';
+        }
+
+        // CONTROL DE SESIÓN AL CARGAR
+        window.addEventListener('DOMContentLoaded', () => {
+            if (sessionStorage.getItem('acceso_autorizado') === 'true') {
+                document.getElementById('loginOverlay').style.display = 'none';
+            }
+            renderStudentList();
+            if(studentsData.length > 0) selectStudent(studentsData[0].id);
+        });
+
+        // DATOS DE PRUEBA (Estructura base)
         const studentsData = [
             {
                 id: "ALU-101",
@@ -499,10 +636,6 @@
                 item.style.display = text.includes(query) ? 'flex' : 'none';
             });
         }
-
-        // Inicializar
-        renderStudentList();
-        if(studentsData.length > 0) selectStudent(studentsData[0].id);
     </script>
 </body>
 </html>
