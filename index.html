@@ -10,7 +10,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            /* PALETA OFICIAL ESCUDO ECHEVERRÍA */
             --echeverria-teal: #3AAFA9;
             --echeverria-teal-dark: #2B7A78;
             --echeverria-dark: #17252A;
@@ -39,7 +38,7 @@
             min-height: 100vh;
         }
 
-        /* OVERLAY DE SEGURIDAD / LOGIN */
+        /* OVERLAY LOGIN */
         #loginOverlay {
             position: fixed;
             top: 0; 
@@ -122,7 +121,7 @@
             display: none;
         }
 
-        /* HEADER INSTITUCIONAL */
+        /* HEADER */
         header {
             background-color: var(--echeverria-dark);
             color: white;
@@ -183,7 +182,7 @@
             border-color: var(--echeverria-teal);
         }
 
-        /* LAYOUT PRINCIPAL */
+        /* LAYOUT */
         .container {
             display: grid;
             grid-template-columns: 350px 1fr;
@@ -192,7 +191,6 @@
             flex-grow: 1;
         }
 
-        /* SIDEBAR / LISTADO DE ALUMNOS */
         .sidebar {
             background: var(--card-bg);
             border-radius: 8px;
@@ -278,7 +276,6 @@
         .badge-ppi { background-color: var(--ppi-color); }
         .badge-acomp { background-color: var(--acomp-color); }
 
-        /* CONTENIDO PRINCIPAL / FICHA DEL ALUMNO */
         .main-content {
             background: var(--card-bg);
             border-radius: 8px;
@@ -332,7 +329,6 @@
             letter-spacing: 0.5px;
         }
 
-        /* HISTORIAL / BITÁCORA */
         .timeline {
             display: flex;
             flex-direction: column;
@@ -360,7 +356,6 @@
             line-height: 1.4;
         }
 
-        /* FORMULARIO BITÁCORA */
         .add-entry-form {
             display: flex;
             flex-direction: column;
@@ -403,7 +398,7 @@
 </head>
 <body>
 
-    <!-- OVERLAY DE SEGURIDAD / LOGIN -->
+    <!-- OVERLAY LOGIN -->
     <div id="loginOverlay">
         <div class="login-card">
             <img src="ESCUDO.png" alt="Escudo Colegio Echeverría" class="escudo-login">
@@ -418,7 +413,7 @@
         </div>
     </div>
 
-    <!-- HEADER INSTITUCIONAL -->
+    <!-- HEADER -->
     <header>
         <div class="header-title">
             <img src="ESCUDO.png" alt="Escudo Colegio Echeverría" class="escudo-header">
@@ -438,46 +433,46 @@
     </header>
 
     <div class="container">
-        <!-- BARRA LATERAL: BUSCADOR Y LISTA -->
+        <!-- BUSCADOR Y LISTA -->
         <aside class="sidebar">
             <div class="search-box">
                 <i class="fa-solid fa-magnifying-glass"></i>
                 <input type="text" id="searchInput" placeholder="Buscar por alumno o código..." onkeyup="filterStudents()">
             </div>
             <div class="student-list" id="studentList">
-                <!-- Se cargan dinámicamente -->
+                <p style="text-align: center; font-size: 0.85rem; color: var(--text-muted); padding: 1rem;">Cargando alumnos...</p>
             </div>
         </aside>
 
-        <!-- CONTENIDO PRINCIPAL: FICHA DEL ALUMNO -->
+        <!-- CONTENIDO PRINCIPAL -->
         <main class="main-content" id="mainContent">
             <div class="student-header">
                 <div class="student-title">
                     <h2 id="studentName">Seleccioná un alumno</h2>
-                    <p id="studentMeta">Código: - | Curso: -</p>
+                    <p id="studentMeta">Código: - | Curso: - | Orientación: -</p>
                 </div>
                 <div class="badges" id="studentBadges"></div>
             </div>
 
             <div class="grid-2">
-                <!-- SECCIÓN PPI Y ACOMPAÑAMIENTOS -->
+                <!-- PPI Y ACOMPAÑAMIENTOS -->
                 <div class="card-section">
                     <h3><i class="fa-solid fa-user-check"></i> Dispositivos y Acompañamientos</h3>
                     <div id="ppiDetails">
-                        <p style="font-size: 0.85rem; color: var(--text-muted);">Seleccioná un estudiante para ver sus configuraciones de apoyo o PPI.</p>
+                        <p style="font-size: 0.85rem; color: var(--text-muted);">Seleccioná un estudiante para ver sus configuraciones de apoyo.</p>
                     </div>
                 </div>
 
-                <!-- SECCIÓN PENDIENTES / TRAYECTORIAS -->
+                <!-- PENDIENTES -->
                 <div class="card-section">
-                    <h3><i class="fa-solid fa-book-bookmark"></i> Materias Pendientes (Articulación)</h3>
+                    <h3><i class="fa-solid fa-book-bookmark"></i> Materias Pendientes</h3>
                     <div id="pendingDetails">
                         <p style="font-size: 0.85rem; color: var(--text-muted);">Sin información de pendientes cargada.</p>
                     </div>
                 </div>
             </div>
 
-            <!-- BITÁCORA / SEGUIMIENTO HISTÓRICO -->
+            <!-- BITÁCORA -->
             <div class="card-section">
                 <h3><i class="fa-solid fa-clock-rotate-left"></i> Historial y Recorrido Institucional</h3>
                 
@@ -487,26 +482,28 @@
                 </div>
 
                 <div class="timeline" id="timelineList">
-                    <!-- Registros dinámicos -->
+                    <!-- Registros -->
                 </div>
             </div>
         </main>
     </div>
 
     <script>
-        // CONFIGURACIÓN DE SEGURIDAD Y CLAVE
         const CLAVE_DIRECCION = "Echeverria2026";
+        const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSt-GvvdE1_ajoyh-4zeehfLRpWAt7SXX8ajK5O1u4Y2zOj3frDNzZWDQAAWzMwO3fISiZjjaEUYD4S/pub?gid=608213945&single=true&output=csv";
 
+        let studentsData = [];
+        let selectedStudentId = null;
+
+        // AUTHENTICATION
         function validarAcceso(event) {
             event.preventDefault();
             const inputPass = document.getElementById('accessPass').value;
-            const errorMsg = document.getElementById('errorMsg');
-
             if (inputPass === CLAVE_DIRECCION) {
                 document.getElementById('loginOverlay').style.display = 'none';
                 sessionStorage.setItem('acceso_autorizado', 'true');
             } else {
-                errorMsg.style.display = 'block';
+                document.getElementById('errorMsg').style.display = 'block';
                 document.getElementById('accessPass').value = '';
             }
         }
@@ -518,47 +515,82 @@
             document.getElementById('loginOverlay').style.display = 'flex';
         }
 
-        // CONTROL DE SESIÓN AL CARGAR
-        window.addEventListener('DOMContentLoaded', () => {
-            if (sessionStorage.getItem('acceso_autorizado') === 'true') {
-                document.getElementById('loginOverlay').style.display = 'none';
+        // CSV PARSER
+        function parseCSVLine(text) {
+            let p = '', c = '', inQuotes = false;
+            let row = [];
+            for (let i = 0; i < text.length; i++) {
+                let cc = text[i];
+                let nc = text[i+1];
+                if (cc === '"') {
+                    if (inQuotes && nc === '"') { p += '"'; i++; }
+                    else { inQuotes = !inQuotes; }
+                } else if (cc === ',' && !inQuotes) {
+                    row.push(p.trim());
+                    p = '';
+                } else {
+                    p += cc;
+                }
             }
-            renderStudentList();
-            if(studentsData.length > 0) selectStudent(studentsData[0].id);
-        });
+            row.push(p.trim());
+            return row;
+        }
 
-        // DATOS DE PRUEBA
-        const studentsData = [
-            {
-                id: "ALU-101",
-                name: "García, Lucas",
-                course: "3° Año A",
-                ppi: true,
-                ppiDetail: "PPI activo con adecuación conceptual y metodológica. Acompañamiento APND.",
-                acomp: true,
-                acompDetail: "Seguimiento periódico por Equipo de Orientación Escolar (EOE).",
-                pending: ["Matemática (2° Año) - Pendiente", "Geografía (2° Año) - En Proceso"],
-                timeline: [
-                    { date: "15/03/2026", text: "Reunión con la familia e integradora APND para acordar pautas de evaluación del primer cuatrimestre." },
-                    { date: "02/03/2026", text: "Inicio de ciclo lectivo con presentación del informe pedagógico 2025." }
-                ]
-            },
-            {
-                id: "ALU-102",
-                name: "Martínez, Sofía",
-                course: "5° Año B",
-                ppi: false,
-                ppiDetail: "Sin PPI asignado.",
-                acomp: false,
-                acompDetail: "Sin acompañamientos específicos registrados.",
-                pending: ["Físico-Química (3° Año) - Pendiente"],
-                timeline: [
-                    { date: "10/03/2026", text: "Entrevista individual sobre plan de acreditación de materia pendiente." }
-                ]
+        // LOAD SHEET DATA
+        async function loadSheetData() {
+            try {
+                const response = await fetch(SHEET_CSV_URL);
+                const csvText = await response.text();
+                
+                const lines = csvText.split(/\r\n|\n/).filter(line => line.trim() !== '');
+                studentsData = [];
+
+                for (let i = 1; i < lines.length; i++) {
+                    const row = parseCSVLine(lines[i]);
+                    if (row.length < 2) continue;
+
+                    const id = row[0] || `ALU-${i}`;
+                    const name = row[1] || 'Sin Nombre';
+                    const course = row[2] || '-';
+                    const orientation = row[3] || '-';
+                    const ppi = (row[4] || '').toUpperCase() === 'SI';
+                    const ppiDetail = row[5] || 'Sin observaciones.';
+                    const acomp = (row[6] || '').toUpperCase() === 'SI';
+                    const acompDetail = row[7] || 'Sin observaciones.';
+                    const pendingRaw = row[8] || '';
+                    const pending = pendingRaw ? pendingRaw.split(';').map(p => p.trim()) : [];
+                    const historyRaw = row[9] || '';
+                    
+                    let timeline = [];
+                    if (historyRaw) {
+                        const entries = historyRaw.split('|');
+                        entries.forEach(e => {
+                            const parts = e.split(':');
+                            if (parts.length >= 2) {
+                                timeline.push({
+                                    date: parts[0].trim(),
+                                    text: parts.slice(1).join(':').trim()
+                                });
+                            } else {
+                                timeline.push({ date: '-', text: e.trim() });
+                            }
+                        });
+                    }
+
+                    studentsData.push({
+                        id, name, course, orientation, ppi, ppiDetail, acomp, acompDetail, pending, timeline
+                    });
+                }
+
+                renderStudentList();
+                if (studentsData.length > 0) {
+                    selectStudent(studentsData[0].id);
+                }
+            } catch (error) {
+                console.error("Error al cargar datos desde Google Sheets:", error);
+                document.getElementById('studentList').innerHTML = '<p style="color:red; font-size:0.8rem; padding:1rem;">Error de conexión con Google Sheets.</p>';
             }
-        ];
-
-        let selectedStudentId = null;
+        }
 
         function renderStudentList() {
             const list = document.getElementById('studentList');
@@ -590,7 +622,7 @@
             if (!student) return;
 
             document.getElementById('studentName').innerText = student.name;
-            document.getElementById('studentMeta').innerText = `Código: ${student.id} | Curso: ${student.course}`;
+            document.getElementById('studentMeta').innerText = `Código: ${student.id} | Curso: ${student.course} | Orientación: ${student.orientation}`;
             
             let badgesHtml = '';
             if(student.ppi) badgesHtml += `<span class="badge badge-ppi">PPI VIGENTE</span>`;
@@ -602,12 +634,14 @@
                 <p style="font-size: 0.88rem;"><strong>Acompañamiento:</strong> ${student.acompDetail}</p>
             `;
 
-            let pendingHtml = '<ul style="padding-left: 1.2rem; font-size: 0.88rem;">';
-            student.pending.forEach(p => {
-                pendingHtml += `<li>${p}</li>`;
-            });
-            pendingHtml += '</ul>';
-            document.getElementById('pendingDetails').innerHTML = pendingHtml;
+            if (student.pending.length > 0 && student.pending[0] !== 'Sin materias pendientes') {
+                let pendingHtml = '<ul style="padding-left: 1.2rem; font-size: 0.88rem;">';
+                student.pending.forEach(p => { pendingHtml += `<li>${p}</li>`; });
+                pendingHtml += '</ul>';
+                document.getElementById('pendingDetails').innerHTML = pendingHtml;
+            } else {
+                document.getElementById('pendingDetails').innerHTML = '<p style="font-size: 0.85rem; color: var(--text-muted);">Sin materias pendientes registradas.</p>';
+            }
 
             renderTimeline(student);
         }
@@ -615,6 +649,10 @@
         function renderTimeline(student) {
             const timelineList = document.getElementById('timelineList');
             timelineList.innerHTML = '';
+            if (student.timeline.length === 0) {
+                timelineList.innerHTML = '<p style="font-size:0.85rem; color:var(--text-muted);">Sin intervenciones registradas.</p>';
+                return;
+            }
             student.timeline.forEach(entry => {
                 const div = document.createElement('div');
                 div.className = 'timeline-entry';
@@ -627,10 +665,7 @@
         }
 
         function addTimelineEntry() {
-            if (!selectedStudentId) {
-                alert("Por favor seleccioná un alumno primero.");
-                return;
-            }
+            if (!selectedStudentId) return;
             const textInput = document.getElementById('newEntryText');
             if (!textInput.value.trim()) return;
 
@@ -654,6 +689,13 @@
                 item.style.display = text.includes(query) ? 'flex' : 'none';
             });
         }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            if (sessionStorage.getItem('acceso_autorizado') === 'true') {
+                document.getElementById('loginOverlay').style.display = 'none';
+            }
+            loadSheetData();
+        });
     </script>
 </body>
 </html>
