@@ -21,6 +21,8 @@
             --text-muted: #718096;
             --ppi-color: #DD6B20;
             --doe-color: #2B6CB0;
+            --activo-color: #38A169;
+            --baja-color: #E53E3E;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
@@ -81,9 +83,12 @@
             cursor: pointer; display: flex; justify-content: space-between; align-items: center;
         }
         .student-item:hover, .student-item.active { border-color: var(--echeverria-teal); background-color: #F0FDFB; }
-        .badges { display: flex; gap: 0.3rem; }
-        .badge { font-size: 0.65rem; padding: 0.2rem 0.4rem; border-radius: 4px; font-weight: 700; color: white; }
+        
+        .badges { display: flex; gap: 0.3rem; align-items: center; }
+        .badge { font-size: 0.65rem; padding: 0.2rem 0.4rem; border-radius: 4px; font-weight: 700; color: white; text-transform: uppercase; }
         .badge-ppi { background-color: var(--ppi-color); }
+        .badge-activo { background-color: var(--activo-color); }
+        .badge-baja { background-color: var(--baja-color); }
 
         /* CONTENIDO PRINCIPAL */
         .main-content {
@@ -93,6 +98,10 @@
         .student-header {
             border-bottom: 2px solid var(--border-color); padding-bottom: 1rem; margin-bottom: 1.5rem;
             display: flex; justify-content: space-between; align-items: flex-start;
+        }
+
+        .student-title-container {
+            display: flex; align-items: center; gap: 0.75rem;
         }
 
         .grid-sections { display: flex; flex-direction: column; gap: 1.5rem; margin-bottom: 1.5rem; }
@@ -213,8 +222,11 @@
         <main class="main-content">
             <div class="student-header">
                 <div>
-                    <h2 id="studentName">Seleccioná un alumno</h2>
-                    <p id="studentMeta" style="color: var(--text-muted); font-size: 0.9rem;">Legajo: - | Curso: - | CITADE: -</p>
+                    <div class="student-title-container">
+                        <h2 id="studentName">Seleccioná un alumno</h2>
+                        <span id="studentStatusBadge"></span>
+                    </div>
+                    <p id="studentMeta" style="color: var(--text-muted); font-size: 0.9rem; margin-top: 0.3rem;">Legajo: - | Curso: - | CITADE: -</p>
                 </div>
                 <div class="badges" id="studentBadges"></div>
             </div>
@@ -346,15 +358,20 @@
                     const name = row[1] || 'Sin Nombre';
                     const course = row[2] || '-';
                     const legajo = row[3] || `ALU-${i}`;
-                    const ppi = (row[4] || '').toUpperCase() === 'SI';
-                    const adaptacioDetail = row[5] || 'Sin observaciones.';
-                    const pendingRaw = row[6] || '';
+                    
+                    // COLUMNA E: ESTADO (ACTIVO / BAJA)
+                    const statusRaw = (row[4] || 'ACTIVO').trim().toUpperCase();
+                    const status = statusRaw.includes('BAJA') ? 'BAJA' : 'ACTIVO';
+
+                    const ppi = (row[5] || '').toUpperCase() === 'SI';
+                    const adaptacioDetail = row[6] || 'Sin observaciones.';
+                    const pendingRaw = row[7] || '';
                     const pending = pendingRaw ? pendingRaw.split(/\r?\n|;/).map(p => p.trim()).filter(p => p !== '') : [];
                     
-                    const doeSugerencias = row[7] || '';
-                    const doeActas = row[8] || '';
-                    const doePpi = row[9] || '';
-                    const historyRaw = row[10] || '';
+                    const doeSugerencias = row[8] || '';
+                    const doeActas = row[9] || '';
+                    const doePpi = row[10] || '';
+                    const historyRaw = row[11] || '';
 
                     let timeline = [];
                     if (historyRaw) {
@@ -369,7 +386,7 @@
                     }
 
                     studentsData.push({ 
-                        id: legajo, name, course, citade, ppi, adaptacioDetail, 
+                        id: legajo, name, course, citade, status, ppi, adaptacioDetail, 
                         doeSugerencias, doeActas, doePpi, pending, timeline 
                     });
                 }
@@ -386,12 +403,18 @@
                 const item = document.createElement('div');
                 item.className = `student-item ${selectedStudentId === student.id ? 'active' : ''}`;
                 item.onclick = () => selectStudent(student.id);
+
+                const statusClass = student.status === 'BAJA' ? 'badge-baja' : 'badge-activo';
+
                 item.innerHTML = `
                     <div>
                         <h4 style="font-size:0.9rem; color:var(--echeverria-dark);">${student.name}</h4>
                         <p style="font-size:0.78rem; color:var(--text-muted);">${student.course} | ${student.id}</p>
                     </div>
-                    ${student.ppi ? '<span class="badge badge-ppi">PPI</span>' : ''}
+                    <div class="badges">
+                        <span class="badge ${statusClass}">${student.status}</span>
+                        ${student.ppi ? '<span class="badge badge-ppi">PPI</span>' : ''}
+                    </div>
                 `;
                 list.appendChild(item);
             });
@@ -404,6 +427,15 @@
             if (!student) return;
 
             document.getElementById('studentName').innerText = student.name;
+            
+            // INDICADOR DE ESTADO JUNTO AL NOMBRE
+            const statusBadgeContainer = document.getElementById('studentStatusBadge');
+            if (student.status === 'BAJA') {
+                statusBadgeContainer.innerHTML = `<span class="badge badge-baja" style="font-size:0.75rem; padding: 0.3rem 0.6rem;">BAJA</span>`;
+            } else {
+                statusBadgeContainer.innerHTML = `<span class="badge badge-activo" style="font-size:0.75rem; padding: 0.3rem 0.6rem;">ACTIVO</span>`;
+            }
+
             document.getElementById('studentMeta').innerText = `Legajo: ${student.id} | Curso: ${student.course} | CITADE: ${student.citade}`;
             document.getElementById('studentBadges').innerHTML = student.ppi ? '<span class="badge badge-ppi">PPI VIGENTE</span>' : '';
 
@@ -418,7 +450,7 @@
                 document.getElementById('pendingDetails').innerHTML = '<p style="font-size:0.85rem; color:var(--text-muted);">Sin materias pendientes.</p>';
             }
 
-            // HABILITAR / DESHABILITAR BOTONES SEGÚN CANTIDAD DE LINKS
+            // HABILITAR / DESHABILITAR BOTONES DOE
             const sugUrls = extractAllUrls(student.doeSugerencias);
             const actasUrls = extractAllUrls(student.doeActas);
             const ppiUrls = extractAllUrls(student.doePpi);
@@ -442,7 +474,6 @@
             }
         }
 
-        // ABRIR VENTANA DE DEPOSITO DE DOCUMENTOS
         function openDocDepot(categoryTitle) {
             const student = studentsData.find(s => s.id === selectedStudentId);
             if (!student) return;
@@ -454,13 +485,11 @@
 
             if (urls.length === 0) return;
 
-            // Si hay 1 solo documento, abre directamente
             if (urls.length === 1) {
                 window.open(urls[0], '_blank');
                 return;
             }
 
-            // Si hay más de 1, muestra el menú de selección
             document.getElementById('modalTitle').innerText = categoryTitle;
             const listContainer = document.getElementById('modalDocList');
             listContainer.innerHTML = '';
