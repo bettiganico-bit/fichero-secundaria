@@ -217,7 +217,7 @@
                     <h3 style="color: var(--doe-color);"><i class="fa-solid fa-users-rectangle"></i> Departamento de Orientación Escolar (D.O.E.)</h3>
                     <strong style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase;">Documentación y Legajo Adjunto:</strong>
                     <div class="doe-buttons-container" id="doeButtons">
-                        <!-- Botones clasificados -->
+                        <!-- Botones clasificados dinámicos -->
                     </div>
                 </div>
 
@@ -258,9 +258,11 @@
             document.getElementById('loginOverlay').style.display = 'flex';
         }
 
-        function extractUrl(text) {
-            const match = (text || '').match(/(https?:\/\/[^\s]+)/);
-            return match ? match[0] : null;
+        // EXTRAE TODOS LOS ENLACES PRESENTES EN UNA CELDA DE TEXTO
+        function extractAllUrls(text) {
+            if (!text) return [];
+            const matches = text.match(/(https?:\/\/[^\s"\')]+)/g);
+            return matches ? matches : [];
         }
 
         function parseCSVFull(text) {
@@ -303,12 +305,10 @@
                     const pendingRaw = row[6] || '';
                     const pending = pendingRaw ? pendingRaw.split(/\r?\n|;/).map(p => p.trim()).filter(p => p !== '') : [];
                     
-                    // COLUMNAS ESPECÍFICAS DE DOE
                     const doeSugerencias = row[7] || '';
                     const doeActas = row[8] || '';
                     const doePpi = row[9] || '';
                     
-                    // HISTORIAL EN COLUMNA K (11)
                     const historyRaw = row[10] || '';
 
                     let timeline = [];
@@ -373,32 +373,35 @@
                 document.getElementById('pendingDetails').innerHTML = '<p style="font-size:0.85rem; color:var(--text-muted);">Sin materias pendientes.</p>';
             }
 
-            // BOTONERA DOE CLASIFICADA
+            // BOTONERA MULTI-LINK DOE
             const doeBtnContainer = document.getElementById('doeButtons');
             doeBtnContainer.innerHTML = '';
 
             let hasDoc = false;
 
-            // Botón Sugerencias
-            const sugUrl = extractUrl(student.doeSugerencias);
-            if (sugUrl) {
+            // Extraer todos los links de la columna Sugerencias/Intervenciones (Columna H)
+            const sugUrls = extractAllUrls(student.doeSugerencias);
+            sugUrls.forEach((url, idx) => {
                 hasDoc = true;
-                doeBtnContainer.innerHTML += `<a href="${sugUrl}" target="_blank" class="btn-doe btn-sugerencias"><i class="fa-solid fa-clipboard-list"></i> Intervenciones / Sugerencias <i class="fa-solid fa-arrow-up-right-from-square" style="font-size:0.7rem;"></i></a>`;
-            }
+                const label = sugUrls.length > 1 ? `Intervenciones / Sugerencias ${idx + 1}` : 'Intervenciones / Sugerencias';
+                doeBtnContainer.innerHTML += `<a href="${url}" target="_blank" class="btn-doe btn-sugerencias"><i class="fa-solid fa-clipboard-list"></i> ${label} <i class="fa-solid fa-arrow-up-right-from-square" style="font-size:0.7rem;"></i></a>`;
+            });
 
-            // Botón Actas
-            const actasUrl = extractUrl(student.doeActas);
-            if (actasUrl) {
+            // Extraer todos los links de la columna Actas (Columna I)
+            const actasUrls = extractAllUrls(student.doeActas);
+            actasUrls.forEach((url, idx) => {
                 hasDoc = true;
-                doeBtnContainer.innerHTML += `<a href="${actasUrl}" target="_blank" class="btn-doe btn-actas"><i class="fa-solid fa-file-signature"></i> Actas de Compromiso <i class="fa-solid fa-arrow-up-right-from-square" style="font-size:0.7rem;"></i></a>`;
-            }
+                const label = actasUrls.length > 1 ? `Acta de Compromiso ${idx + 1}` : 'Actas de Compromiso';
+                doeBtnContainer.innerHTML += `<a href="${url}" target="_blank" class="btn-doe btn-actas"><i class="fa-solid fa-file-signature"></i> ${label} <i class="fa-solid fa-arrow-up-right-from-square" style="font-size:0.7rem;"></i></a>`;
+            });
 
-            // Botón PPI
-            const ppiUrl = extractUrl(student.doePpi);
-            if (ppiUrl) {
+            // Extraer todos los links de la columna Documento PPI (Columna J)
+            const ppiUrls = extractAllUrls(student.doePpi);
+            ppiUrls.forEach((url, idx) => {
                 hasDoc = true;
-                doeBtnContainer.innerHTML += `<a href="${ppiUrl}" target="_blank" class="btn-doe btn-ppi-doc"><i class="fa-solid fa-file-pdf"></i> Documento PPI <i class="fa-solid fa-arrow-up-right-from-square" style="font-size:0.7rem;"></i></a>`;
-            }
+                const label = ppiUrls.length > 1 ? `Documento PPI ${idx + 1}` : 'Documento PPI';
+                doeBtnContainer.innerHTML += `<a href="${url}" target="_blank" class="btn-doe btn-ppi-doc"><i class="fa-solid fa-file-pdf"></i> ${label} <i class="fa-solid fa-arrow-up-right-from-square" style="font-size:0.7rem;"></i></a>`;
+            });
 
             if (!hasDoc) {
                 doeBtnContainer.innerHTML = '<span style="font-size:0.8rem; color:var(--text-muted);">Sin documentos adjuntos en esta sección.</span>';
