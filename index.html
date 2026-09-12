@@ -328,6 +328,25 @@
             letter-spacing: 0.5px;
         }
 
+        .doc-link-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            background-color: var(--echeverria-teal-dark);
+            color: white;
+            padding: 0.35rem 0.75rem;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-top: 0.3rem;
+            transition: background 0.2s;
+        }
+
+        .doc-link-btn:hover {
+            background-color: var(--echeverria-dark);
+        }
+
         .pending-list {
             list-style: none;
             padding: 0;
@@ -564,7 +583,18 @@
             document.getElementById('loginOverlay').style.display = 'flex';
         }
 
-        // PARSER DE CSV SOPORTANDO MULTI-LÍNEA EN CELDAS
+        // FORMATO DE TEXTO A ENLACES HTML AUTOMÁTICOS
+        function formatTextWithLinks(text) {
+            if (!text) return 'Sin observaciones.';
+            const urlRegex = /(https?:\/\/[^\s]+)/g;
+            if (urlRegex.test(text)) {
+                return text.replace(urlRegex, function(url) {
+                    return `<br><a href="${url}" target="_blank" class="doc-link-btn"><i class="fa-solid fa-file-lines"></i> Ver Documento Adjunto <i class="fa-solid fa-arrow-up-right-from-square" style="font-size:0.7rem;"></i></a>`;
+                });
+            }
+            return text;
+        }
+
         function parseCSVFull(text) {
             let rows = [];
             let row = [];
@@ -619,7 +649,6 @@
                     const adaptacioDetail = row[5] || 'Sin observaciones.';
                     const pendingRaw = row[6] || '';
                     
-                    // SPLIT DE PENDIENTES POR SALTO DE LÍNEA Y POR PUNTO Y COMA
                     let pending = [];
                     if (pendingRaw) {
                         pending = pendingRaw.split(/\r?\n|;/).map(p => p.trim()).filter(p => p !== '');
@@ -695,12 +724,12 @@
             if(student.ppi) badgesHtml += `<span class="badge badge-ppi">PPI VIGENTE</span>`;
             document.getElementById('studentBadges').innerHTML = badgesHtml;
 
+            // RENDER CON SOPORTE PARA LINKS EN ADAPTACIÓN Y DOE
             document.getElementById('ppiDetails').innerHTML = `
-                <p style="font-size: 0.88rem; margin-bottom: 0.5rem;"><strong>Adaptación:</strong> ${student.adaptacioDetail}</p>
-                <p style="font-size: 0.88rem;"><strong>DOE / Acompañamiento:</strong> ${student.doeDetail}</p>
+                <p style="font-size: 0.88rem; margin-bottom: 0.6rem;"><strong>Adaptación:</strong> ${formatTextWithLinks(student.adaptacioDetail)}</p>
+                <p style="font-size: 0.88rem;"><strong>DOE / Acompañamiento:</strong> ${formatTextWithLinks(student.doeDetail)}</p>
             `;
 
-            // MUESTRA LAS MATERIAS PENDIENTES EN LISTA PROLIJA CON VIÑETAS
             if (student.pending.length > 0) {
                 let pendingHtml = '<ul class="pending-list">';
                 student.pending.forEach(p => { 
@@ -728,7 +757,7 @@
                 div.innerHTML = `
                     <div class="timeline-content">
                         <div class="timeline-date">${entry.date}</div>
-                        <div class="timeline-text">${entry.text}</div>
+                        <div class="timeline-text">${formatTextWithLinks(entry.text)}</div>
                     </div>
                     <div class="timeline-actions">
                         <button class="btn-icon edit" onclick="editTimelineEntry(${index})" title="Editar"><i class="fa-solid fa-pen"></i></button>
