@@ -104,17 +104,41 @@
         }
         .sub-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
 
-        /* BOTONERA CLASIFICADA DOE */
+        /* BOTONERA FIJA DOE */
         .doe-buttons-container { display: flex; flex-wrap: wrap; gap: 0.8rem; margin-top: 0.8rem; }
-        .btn-doe {
-            display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.55rem 1rem;
-            border-radius: 6px; text-decoration: none; font-size: 0.82rem; font-weight: 600; color: white;
-            transition: transform 0.1s, opacity 0.2s;
+        .btn-doe-main {
+            display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.6rem 1.1rem;
+            border-radius: 6px; font-size: 0.85rem; font-weight: 600; color: white; border: none;
+            cursor: pointer; transition: transform 0.1s, opacity 0.2s;
         }
-        .btn-doe:hover { opacity: 0.9; transform: translateY(-1px); }
+        .btn-doe-main:hover { opacity: 0.9; transform: translateY(-1px); }
+        .btn-doe-main:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+        
         .btn-sugerencias { background-color: #2B6CB0; }
         .btn-actas { background-color: #2C7A7B; }
         .btn-ppi-doc { background-color: #C05621; }
+
+        /* MODAL DE DEPOSITO DE DOCUMENTOS */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center;
+            z-index: 10000;
+        }
+        .modal-card {
+            background: white; border-radius: 8px; width: 450px; max-width: 90%; padding: 1.5rem;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2); border-top: 5px solid var(--echeverria-teal);
+        }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+        .modal-header h4 { color: var(--echeverria-dark); font-size: 1.05rem; }
+        .close-modal { background: none; border: none; font-size: 1.2rem; cursor: pointer; color: var(--text-muted); }
+        .doc-list-modal { display: flex; flex-direction: column; gap: 0.6rem; margin-top: 1rem; }
+        .doc-item-link {
+            display: flex; align-items: center; justify-content: space-between;
+            background: #F7FAFC; border: 1px solid var(--border-color); padding: 0.75rem 1rem;
+            border-radius: 6px; text-decoration: none; color: var(--text-main); font-weight: 500; font-size: 0.88rem;
+            transition: all 0.2s;
+        }
+        .doc-item-link:hover { border-color: var(--echeverria-teal); background: #F0FDFB; color: var(--echeverria-teal-dark); }
 
         /* LISTA PENDIENTES */
         .pending-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.4rem; }
@@ -215,9 +239,18 @@
                 <!-- BLOQUE 2: ÁREA D.O.E. -->
                 <div class="card-block" style="border-left: 4px solid var(--doe-color);">
                     <h3 style="color: var(--doe-color);"><i class="fa-solid fa-users-rectangle"></i> Departamento de Orientación Escolar (D.O.E.)</h3>
-                    <strong style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase;">Documentación y Legajo Adjunto:</strong>
-                    <div class="doe-buttons-container" id="doeButtons">
-                        <!-- Botones clasificados dinámicos -->
+                    <strong style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase;">Depósito de Documentación Adjunta:</strong>
+                    
+                    <div class="doe-buttons-container">
+                        <button class="btn-doe-main btn-sugerencias" id="btnSugerencias" onclick="openDocDepot('Intervenciones / Sugerencias')">
+                            <i class="fa-solid fa-clipboard-list"></i> Intervenciones / Sugerencias <span id="badgeSugCount"></span>
+                        </button>
+                        <button class="btn-doe-main btn-actas" id="btnActas" onclick="openDocDepot('Actas de Compromiso')">
+                            <i class="fa-solid fa-file-signature"></i> Actas de Compromiso <span id="badgeActasCount"></span>
+                        </button>
+                        <button class="btn-doe-main btn-ppi-doc" id="btnPpi" onclick="openDocDepot('PPI / Documentación')">
+                            <i class="fa-solid fa-file-pdf"></i> PPI / Documentación <span id="badgePpiCount"></span>
+                        </button>
                     </div>
                 </div>
 
@@ -233,6 +266,20 @@
 
             </div>
         </main>
+    </div>
+
+    <!-- MODAL VENTANA EMERGENTE PARA MOSTRAR DOCUMENTOS -->
+    <div class="modal-overlay" id="docModal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h4 id="modalTitle">Documentos Cargados</h4>
+                <button class="close-modal" onclick="closeDocDepot()"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <p style="font-size: 0.82rem; color: var(--text-muted);">Seleccioná el archivo que querés consultar:</p>
+            <div class="doc-list-modal" id="modalDocList">
+                <!-- Se llena dinámicamente -->
+            </div>
+        </div>
     </div>
 
     <script>
@@ -258,7 +305,6 @@
             document.getElementById('loginOverlay').style.display = 'flex';
         }
 
-        // EXTRAE TODOS LOS ENLACES PRESENTES EN UNA CELDA DE TEXTO
         function extractAllUrls(text) {
             if (!text) return [];
             const matches = text.match(/(https?:\/\/[^\s"\')]+)/g);
@@ -308,7 +354,6 @@
                     const doeSugerencias = row[7] || '';
                     const doeActas = row[8] || '';
                     const doePpi = row[9] || '';
-                    
                     const historyRaw = row[10] || '';
 
                     let timeline = [];
@@ -373,41 +418,67 @@
                 document.getElementById('pendingDetails').innerHTML = '<p style="font-size:0.85rem; color:var(--text-muted);">Sin materias pendientes.</p>';
             }
 
-            // BOTONERA MULTI-LINK DOE
-            const doeBtnContainer = document.getElementById('doeButtons');
-            doeBtnContainer.innerHTML = '';
-
-            let hasDoc = false;
-
-            // Extraer todos los links de la columna Sugerencias/Intervenciones (Columna H)
+            // HABILITAR / DESHABILITAR BOTONES SEGÚN CANTIDAD DE LINKS
             const sugUrls = extractAllUrls(student.doeSugerencias);
-            sugUrls.forEach((url, idx) => {
-                hasDoc = true;
-                const label = sugUrls.length > 1 ? `Intervenciones / Sugerencias ${idx + 1}` : 'Intervenciones / Sugerencias';
-                doeBtnContainer.innerHTML += `<a href="${url}" target="_blank" class="btn-doe btn-sugerencias"><i class="fa-solid fa-clipboard-list"></i> ${label} <i class="fa-solid fa-arrow-up-right-from-square" style="font-size:0.7rem;"></i></a>`;
-            });
-
-            // Extraer todos los links de la columna Actas (Columna I)
             const actasUrls = extractAllUrls(student.doeActas);
-            actasUrls.forEach((url, idx) => {
-                hasDoc = true;
-                const label = actasUrls.length > 1 ? `Acta de Compromiso ${idx + 1}` : 'Actas de Compromiso';
-                doeBtnContainer.innerHTML += `<a href="${url}" target="_blank" class="btn-doe btn-actas"><i class="fa-solid fa-file-signature"></i> ${label} <i class="fa-solid fa-arrow-up-right-from-square" style="font-size:0.7rem;"></i></a>`;
-            });
-
-            // Extraer todos los links de la columna Documento PPI (Columna J)
             const ppiUrls = extractAllUrls(student.doePpi);
-            ppiUrls.forEach((url, idx) => {
-                hasDoc = true;
-                const label = ppiUrls.length > 1 ? `Documento PPI ${idx + 1}` : 'Documento PPI';
-                doeBtnContainer.innerHTML += `<a href="${url}" target="_blank" class="btn-doe btn-ppi-doc"><i class="fa-solid fa-file-pdf"></i> ${label} <i class="fa-solid fa-arrow-up-right-from-square" style="font-size:0.7rem;"></i></a>`;
-            });
 
-            if (!hasDoc) {
-                doeBtnContainer.innerHTML = '<span style="font-size:0.8rem; color:var(--text-muted);">Sin documentos adjuntos en esta sección.</span>';
-            }
+            setupButton('btnSugerencias', 'badgeSugCount', sugUrls);
+            setupButton('btnActas', 'badgeActasCount', actasUrls);
+            setupButton('btnPpi', 'badgePpiCount', ppiUrls);
 
             renderTimeline(student);
+        }
+
+        function setupButton(btnId, badgeId, urls) {
+            const btn = document.getElementById(btnId);
+            const badge = document.getElementById(badgeId);
+            if (urls.length > 0) {
+                btn.disabled = false;
+                badge.innerText = `(${urls.length})`;
+            } else {
+                btn.disabled = true;
+                badge.innerText = '(0)';
+            }
+        }
+
+        // ABRIR VENTANA DE DEPOSITO DE DOCUMENTOS
+        function openDocDepot(categoryTitle) {
+            const student = studentsData.find(s => s.id === selectedStudentId);
+            if (!student) return;
+
+            let urls = [];
+            if (categoryTitle === 'Intervenciones / Sugerencias') urls = extractAllUrls(student.doeSugerencias);
+            if (categoryTitle === 'Actas de Compromiso') urls = extractAllUrls(student.doeActas);
+            if (categoryTitle === 'PPI / Documentación') urls = extractAllUrls(student.doePpi);
+
+            if (urls.length === 0) return;
+
+            // Si hay 1 solo documento, abre directamente
+            if (urls.length === 1) {
+                window.open(urls[0], '_blank');
+                return;
+            }
+
+            // Si hay más de 1, muestra el menú de selección
+            document.getElementById('modalTitle').innerText = categoryTitle;
+            const listContainer = document.getElementById('modalDocList');
+            listContainer.innerHTML = '';
+
+            urls.forEach((url, idx) => {
+                listContainer.innerHTML += `
+                    <a href="${url}" target="_blank" class="doc-item-link">
+                        <span><i class="fa-solid fa-file-lines" style="color:var(--echeverria-teal-dark); margin-right: 8px;"></i> Documento Adjunto N° ${idx + 1}</span>
+                        <i class="fa-solid fa-arrow-up-right-from-square" style="font-size: 0.8rem;"></i>
+                    </a>
+                `;
+            });
+
+            document.getElementById('docModal').style.display = 'flex';
+        }
+
+        function closeDocDepot() {
+            document.getElementById('docModal').style.display = 'none';
         }
 
         function renderTimeline(student) {
