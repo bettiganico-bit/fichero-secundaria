@@ -328,6 +328,33 @@
             letter-spacing: 0.5px;
         }
 
+        .pending-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+        }
+
+        .pending-list li {
+            font-size: 0.88rem;
+            font-weight: 600;
+            color: #C53030;
+            display: flex;
+            align-items: flex-start;
+            gap: 0.5rem;
+            line-height: 1.3;
+        }
+
+        .pending-list li::before {
+            content: "•";
+            color: #C53030;
+            font-weight: bold;
+            font-size: 1.1rem;
+            line-height: 1;
+        }
+
         .timeline {
             display: flex;
             flex-direction: column;
@@ -513,8 +540,6 @@
     <script>
         const CLAVE_DIRECCION = "Echeverria2026";
         const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSt-GvvdE1_ajoyh-4zeehfLRpWAt7SXX8ajK5O1u4Y2zOj3frDNzZWDQAAWzMwO3fISiZjjaEUYD4S/pub?gid=608213945&single=true&output=csv";
-        
-        // URL DE GOOGLE APPS SCRIPT CONFIGURADA
         const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz84aPZxd6ZuSN4yCvLahsiejLEL2RuWkGRsK73IBySFv26U0-HnJtbLqF8IXvUADwz/exec"; 
 
         let studentsData = [];
@@ -539,24 +564,39 @@
             document.getElementById('loginOverlay').style.display = 'flex';
         }
 
-        function parseCSVLine(text) {
-            let p = '', inQuotes = false;
+        // PARSER DE CSV SOPORTANDO MULTI-LÍNEA EN CELDAS
+        function parseCSVFull(text) {
+            let rows = [];
             let row = [];
+            let p = '', inQuotes = false;
+
             for (let i = 0; i < text.length; i++) {
                 let cc = text[i];
                 let nc = text[i+1];
+
                 if (cc === '"') {
                     if (inQuotes && nc === '"') { p += '"'; i++; }
                     else { inQuotes = !inQuotes; }
                 } else if (cc === ',' && !inQuotes) {
                     row.push(p.trim());
                     p = '';
+                } else if ((cc === '\r' || cc === '\n') && !inQuotes) {
+                    if (cc === '\r' && nc === '\n') { i++; }
+                    row.push(p.trim());
+                    if (row.length > 1 || row[0] !== '') {
+                        rows.push(row);
+                    }
+                    row = [];
+                    p = '';
                 } else {
                     p += cc;
                 }
             }
-            row.push(p.trim());
-            return row;
+            if (p || row.length > 0) {
+                row.push(p.trim());
+                rows.push(row);
+            }
+            return rows;
         }
 
         async function loadSheetData() {
@@ -564,11 +604,11 @@
                 const response = await fetch(SHEET_CSV_URL);
                 const csvText = await response.text();
                 
-                const lines = csvText.split(/\r\n|\n/).filter(line => line.trim() !== '');
+                const rows = parseCSVFull(csvText);
                 studentsData = [];
 
-                for (let i = 1; i < lines.length; i++) {
-                    const row = parseCSVLine(lines[i]);
+                for (let i = 1; i < rows.length; i++) {
+                    const row = rows[i];
                     if (row.length < 2) continue;
 
                     const citade = row[0] || '-';
@@ -578,7 +618,13 @@
                     const ppi = (row[4] || '').toUpperCase() === 'SI';
                     const adaptacioDetail = row[5] || 'Sin observaciones.';
                     const pendingRaw = row[6] || '';
-                    const pending = pendingRaw ? pendingRaw.split(';').map(p => p.trim()) : [];
+                    
+                    // SPLIT DE PENDIENTES POR SALTO DE LÍNEA Y POR PUNTO Y COMA
+                    let pending = [];
+                    if (pendingRaw) {
+                        pending = pendingRaw.split(/\r?\n|;/).map(p => p.trim()).filter(p => p !== '');
+                    }
+
                     const doeDetail = row[7] || 'Sin observaciones.';
                     const historyRaw = row[8] || '';
                     
@@ -654,9 +700,12 @@
                 <p style="font-size: 0.88rem;"><strong>DOE / Acompañamiento:</strong> ${student.doeDetail}</p>
             `;
 
-            if (student.pending.length > 0 && student.pending[0] !== '') {
-                let pendingHtml = '<ul style="padding-left: 1.2rem; font-size: 0.88rem; font-weight: 600; color: #C53030;">';
-                student.pending.forEach(p => { pendingHtml += `<li style="margin-bottom: 0.3rem;">${p}</li>`; });
+            // MUESTRA LAS MATERIAS PENDIENTES EN LISTA PROLIJA CON VIÑETAS
+            if (student.pending.length > 0) {
+                let pendingHtml = '<ul class="pending-list">';
+                student.pending.forEach(p => { 
+                    pendingHtml += `<li>${p}</li>`; 
+                });
                 pendingHtml += '</ul>';
                 document.getElementById('pendingDetails').innerHTML = pendingHtml;
             } else {
