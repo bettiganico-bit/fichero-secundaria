@@ -20,67 +20,43 @@
             --text-main: #2D3748;
             --text-muted: #718096;
             --ppi-color: #DD6B20;
-            --doe-color: #3182CE;
+            --doe-color: #2B6CB0;
         }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Inter', sans-serif;
-        }
-
-        body {
-            background-color: var(--bg-light);
-            color: var(--text-main);
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
+        body { background-color: var(--bg-light); color: var(--text-main); display: flex; flex-direction: column; min-height: 100vh; }
 
         /* OVERLAY LOGIN */
         #loginOverlay {
-            position: fixed;
-            top: 0; left: 0; width: 100vw; height: 100vh;
-            background-color: var(--echeverria-navy);
-            display: flex; justify-content: center; align-items: center;
-            z-index: 9999;
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background-color: var(--echeverria-navy); display: flex; justify-content: center; align-items: center; z-index: 9999;
         }
-
         .login-card {
-            background: white; padding: 2.5rem; border-radius: 12px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.4); text-align: center;
-            max-width: 400px; width: 90%; border-top: 6px solid var(--echeverria-teal);
+            background: white; padding: 2.5rem; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+            text-align: center; max-width: 400px; width: 90%; border-top: 6px solid var(--echeverria-teal);
         }
-
         .login-card img.escudo-login { width: 90px; height: auto; margin-bottom: 1rem; }
         .login-card h2 { color: var(--echeverria-dark); font-size: 1.3rem; margin-bottom: 0.3rem; }
         .login-card p.sub { color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1.5rem; }
-
         .login-input {
-            width: 100%; padding: 0.75rem; border: 1px solid var(--border-color);
-            border-radius: 6px; font-size: 0.95rem; margin-bottom: 1rem; outline: none; text-align: center;
+            width: 100%; padding: 0.75rem; border: 1px solid var(--border-color); border-radius: 6px;
+            font-size: 0.95rem; margin-bottom: 1rem; outline: none; text-align: center;
         }
-
         .btn-login {
-            width: 100%; background-color: var(--echeverria-teal-dark); color: white;
-            border: none; padding: 0.75rem; border-radius: 6px; font-weight: 600; cursor: pointer;
+            width: 100%; background-color: var(--echeverria-teal-dark); color: white; border: none;
+            padding: 0.75rem; border-radius: 6px; font-weight: 600; cursor: pointer;
         }
-
         #errorMsg { color: #E53E3E; font-size: 0.85rem; margin-top: 0.8rem; display: none; }
 
         /* HEADER */
         header {
             background-color: var(--echeverria-dark); color: white; padding: 0.8rem 2rem;
-            display: flex; justify-content: space-between; align-items: center;
-            border-bottom: 3px solid var(--echeverria-teal);
+            display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid var(--echeverria-teal);
         }
-
         .header-title { display: flex; align-items: center; gap: 1rem; }
         .header-title img.escudo-header { height: 48px; width: auto; }
         .header-title h1 { font-size: 1.3rem; font-weight: 700; }
         .header-title p { font-size: 0.85rem; color: var(--echeverria-teal); }
-
         .btn-link {
             background-color: rgba(255, 255, 255, 0.08); color: white; padding: 0.5rem 1rem;
             border-radius: 6px; text-decoration: none; font-size: 0.85rem; border: 1px solid rgba(255, 255, 255, 0.1);
@@ -88,29 +64,23 @@
         }
 
         /* LAYOUT */
-        .container {
-            display: grid; grid-template-columns: 320px 1fr; gap: 1.5rem; padding: 1.5rem 2rem; flex-grow: 1;
-        }
-
+        .container { display: grid; grid-template-columns: 320px 1fr; gap: 1.5rem; padding: 1.5rem 2rem; flex-grow: 1; }
         .sidebar {
             background: var(--card-bg); border-radius: 8px; border: 1px solid var(--border-color);
             padding: 1rem; display: flex; flex-direction: column; gap: 1rem; height: calc(100vh - 120px);
         }
-
         .search-box { position: relative; }
         .search-box input {
             width: 100%; padding: 0.6rem 0.6rem 0.6rem 2.2rem; border: 1px solid var(--border-color);
             border-radius: 6px; font-size: 0.9rem; outline: none;
         }
         .search-box i { position: absolute; left: 0.75rem; top: 50%; transform: translateY(-50%); color: var(--text-muted); }
-
         .student-list { overflow-y: auto; display: flex; flex-direction: column; gap: 0.5rem; }
         .student-item {
             padding: 0.8rem; border: 1px solid var(--border-color); border-radius: 6px;
             cursor: pointer; display: flex; justify-content: space-between; align-items: center;
         }
         .student-item:hover, .student-item.active { border-color: var(--echeverria-teal); background-color: #F0FDFB; }
-
         .badges { display: flex; gap: 0.3rem; }
         .badge { font-size: 0.65rem; padding: 0.2rem 0.4rem; border-radius: 4px; font-weight: 700; color: white; }
         .badge-ppi { background-color: var(--ppi-color); }
@@ -120,43 +90,35 @@
             background: var(--card-bg); border-radius: 8px; border: 1px solid var(--border-color);
             padding: 1.5rem; overflow-y: auto; height: calc(100vh - 120px);
         }
-
         .student-header {
             border-bottom: 2px solid var(--border-color); padding-bottom: 1rem; margin-bottom: 1.5rem;
             display: flex; justify-content: space-between; align-items: flex-start;
         }
 
         .grid-sections { display: flex; flex-direction: column; gap: 1.5rem; margin-bottom: 1.5rem; }
-
-        .card-block {
-            border: 1px solid var(--border-color); border-radius: 8px; padding: 1.2rem; background-color: #FAFAFA;
-        }
-
+        .card-block { border: 1px solid var(--border-color); border-radius: 8px; padding: 1.2rem; background-color: #FAFAFA; }
         .card-block h3 {
             font-size: 0.95rem; color: var(--echeverria-teal-dark); margin-bottom: 1rem;
             display: flex; align-items: center; gap: 0.5rem; text-transform: uppercase; letter-spacing: 0.5px;
             border-bottom: 1px solid #E2E8F0; padding-bottom: 0.5rem;
         }
-
         .sub-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
 
-        /* BOTONERA DOCUMENTOS DOE */
-        .doe-buttons-container {
-            display: flex; flex-wrap: wrap; gap: 0.6rem; margin-top: 0.8rem;
+        /* BOTONERA CLASIFICADA DOE */
+        .doe-buttons-container { display: flex; flex-wrap: wrap; gap: 0.8rem; margin-top: 0.8rem; }
+        .btn-doe {
+            display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.55rem 1rem;
+            border-radius: 6px; text-decoration: none; font-size: 0.82rem; font-weight: 600; color: white;
+            transition: transform 0.1s, opacity 0.2s;
         }
-
-        .btn-doe-doc {
-            display: inline-flex; align-items: center; gap: 0.5rem; background-color: #3182CE;
-            color: white; padding: 0.5rem 0.9rem; border-radius: 6px; text-decoration: none;
-            font-size: 0.82rem; font-weight: 600; transition: background 0.2s;
-        }
-        .btn-doe-doc:hover { background-color: #2B6CB0; }
+        .btn-doe:hover { opacity: 0.9; transform: translateY(-1px); }
+        .btn-sugerencias { background-color: #2B6CB0; }
+        .btn-actas { background-color: #2C7A7B; }
+        .btn-ppi-doc { background-color: #C05621; }
 
         /* LISTA PENDIENTES */
         .pending-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.4rem; }
-        .pending-list li {
-            font-size: 0.88rem; font-weight: 600; color: #C53030; display: flex; align-items: flex-start; gap: 0.5rem;
-        }
+        .pending-list li { font-size: 0.88rem; font-weight: 600; color: #C53030; display: flex; align-items: flex-start; gap: 0.5rem; }
         .pending-list li::before { content: "•"; color: #C53030; font-weight: bold; font-size: 1.1rem; }
 
         /* BITÁCORA */
@@ -167,11 +129,9 @@
         }
         .timeline-date { font-size: 0.75rem; font-weight: 700; color: var(--echeverria-teal-dark); margin-bottom: 0.3rem; }
         .timeline-text { font-size: 0.88rem; line-height: 1.4; }
-
         .btn-icon { background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 0.85rem; padding: 0.2rem; }
         .btn-icon:hover.edit { color: var(--echeverria-teal-dark); }
         .btn-icon:hover.delete { color: #E53E3E; }
-
         .add-entry-form { display: flex; flex-direction: column; gap: 0.8rem; margin-top: 1rem; }
         textarea {
             width: 100%; padding: 0.6rem; border: 1px solid var(--border-color); border-radius: 6px;
@@ -246,19 +206,18 @@
                             <div id="pendingDetails" style="margin-top: 0.5rem;">-</div>
                         </div>
                         <div>
-                            <strong style="font-size: 0.85rem; color: var(--text-muted);">ADAPTACIONES Y PPI:</strong>
+                            <strong style="font-size: 0.85rem; color: var(--text-muted);">ADAPTACIONES Y ACUERDOS:</strong>
                             <p id="adaptacionDetails" style="font-size: 0.88rem; margin-top: 0.5rem;">-</p>
                         </div>
                     </div>
                 </div>
 
-                <!-- BLOQUE 2: ÁREA D.O.E. Y DOCUMENTACIÓN INSTITUCIONAL -->
+                <!-- BLOQUE 2: ÁREA D.O.E. -->
                 <div class="card-block" style="border-left: 4px solid var(--doe-color);">
                     <h3 style="color: var(--doe-color);"><i class="fa-solid fa-users-rectangle"></i> Departamento de Orientación Escolar (D.O.E.)</h3>
-                    <div id="doeSummary" style="font-size: 0.88rem; margin-bottom: 0.8rem;">-</div>
-                    <strong style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase;">Documentos e Intervenciones Adjuntas:</strong>
+                    <strong style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase;">Documentación y Legajo Adjunto:</strong>
                     <div class="doe-buttons-container" id="doeButtons">
-                        <!-- Se generan automáticamente los botones por cada documento -->
+                        <!-- Botones clasificados -->
                     </div>
                 </div>
 
@@ -297,6 +256,11 @@
         function cerrarSesion() {
             sessionStorage.removeItem('acceso_autorizado');
             document.getElementById('loginOverlay').style.display = 'flex';
+        }
+
+        function extractUrl(text) {
+            const match = (text || '').match(/(https?:\/\/[^\s]+)/);
+            return match ? match[0] : null;
         }
 
         function parseCSVFull(text) {
@@ -338,8 +302,14 @@
                     const adaptacioDetail = row[5] || 'Sin observaciones.';
                     const pendingRaw = row[6] || '';
                     const pending = pendingRaw ? pendingRaw.split(/\r?\n|;/).map(p => p.trim()).filter(p => p !== '') : [];
-                    const doeDetail = row[7] || 'Sin observaciones.';
-                    const historyRaw = row[8] || '';
+                    
+                    // COLUMNAS ESPECÍFICAS DE DOE
+                    const doeSugerencias = row[7] || '';
+                    const doeActas = row[8] || '';
+                    const doePpi = row[9] || '';
+                    
+                    // HISTORIAL EN COLUMNA K (11)
+                    const historyRaw = row[10] || '';
 
                     let timeline = [];
                     if (historyRaw) {
@@ -353,7 +323,10 @@
                         });
                     }
 
-                    studentsData.push({ id: legajo, name, course, citade, ppi, adaptacioDetail, doeDetail, pending, timeline });
+                    studentsData.push({ 
+                        id: legajo, name, course, citade, ppi, adaptacioDetail, 
+                        doeSugerencias, doeActas, doePpi, pending, timeline 
+                    });
                 }
 
                 renderStudentList();
@@ -400,27 +373,35 @@
                 document.getElementById('pendingDetails').innerHTML = '<p style="font-size:0.85rem; color:var(--text-muted);">Sin materias pendientes.</p>';
             }
 
-            // ÁREA D.O.E.
-            const urlRegex = /(https?:\/\/[^\s]+)/g;
-            const urls = student.doeDetail.match(urlRegex) || [];
-            const cleanText = student.doeDetail.replace(urlRegex, '').trim();
-
-            document.getElementById('doeSummary').innerText = cleanText || 'Acompañamiento institucional registrado.';
-            
+            // BOTONERA DOE CLASIFICADA
             const doeBtnContainer = document.getElementById('doeButtons');
             doeBtnContainer.innerHTML = '';
 
-            if (urls.length > 0) {
-                urls.forEach((url, idx) => {
-                    const btn = document.createElement('a');
-                    btn.href = url;
-                    btn.target = '_blank';
-                    btn.className = 'btn-doe-doc';
-                    btn.innerHTML = `<i class="fa-solid fa-file-signature"></i> Abrir Documento DOE ${urls.length > 1 ? (idx + 1) : ''} <i class="fa-solid fa-arrow-up-right-from-square" style="font-size:0.7rem;"></i>`;
-                    doeBtnContainer.appendChild(btn);
-                });
-            } else {
-                doeBtnContainer.innerHTML = '<span style="font-size:0.8rem; color:var(--text-muted);">Sin documentos adjuntos.</span>';
+            let hasDoc = false;
+
+            // Botón Sugerencias
+            const sugUrl = extractUrl(student.doeSugerencias);
+            if (sugUrl) {
+                hasDoc = true;
+                doeBtnContainer.innerHTML += `<a href="${sugUrl}" target="_blank" class="btn-doe btn-sugerencias"><i class="fa-solid fa-clipboard-list"></i> Intervenciones / Sugerencias <i class="fa-solid fa-arrow-up-right-from-square" style="font-size:0.7rem;"></i></a>`;
+            }
+
+            // Botón Actas
+            const actasUrl = extractUrl(student.doeActas);
+            if (actasUrl) {
+                hasDoc = true;
+                doeBtnContainer.innerHTML += `<a href="${actasUrl}" target="_blank" class="btn-doe btn-actas"><i class="fa-solid fa-file-signature"></i> Actas de Compromiso <i class="fa-solid fa-arrow-up-right-from-square" style="font-size:0.7rem;"></i></a>`;
+            }
+
+            // Botón PPI
+            const ppiUrl = extractUrl(student.doePpi);
+            if (ppiUrl) {
+                hasDoc = true;
+                doeBtnContainer.innerHTML += `<a href="${ppiUrl}" target="_blank" class="btn-doe btn-ppi-doc"><i class="fa-solid fa-file-pdf"></i> Documento PPI <i class="fa-solid fa-arrow-up-right-from-square" style="font-size:0.7rem;"></i></a>`;
+            }
+
+            if (!hasDoc) {
+                doeBtnContainer.innerHTML = '<span style="font-size:0.8rem; color:var(--text-muted);">Sin documentos adjuntos en esta sección.</span>';
             }
 
             renderTimeline(student);
